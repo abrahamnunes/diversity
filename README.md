@@ -20,16 +20,23 @@ Documentation is provided in the Jupyter notebooks located in the `docs/` direct
     - Includes decomposition (`renyi_decomp`) into $\\alpha$ (`renyi_alpha`) and $\\beta$ components
 - Rényi entropy: `renyi_entropy`
 - Coefficient of variation: `coef_variation`
+- Community weighted mean: `func_cwm`
 - Freeman index: `freeman_index`
+- Functional divergence: `func_div`
 - Generalized Entropy Index: `gei`
+- Gini coefficient (based on Lorenz curve): `gini_lorenz`
 - Gini-Simpson index: `gini_simpson`
 - Hartley heterogeneity: `hartley`
 - Hartley entropy: `hartley_entropy`
 - Lincoln index (base, Chapman, and Bayesian estimators): `lincoln_index`
+- Lorenz curves: `lorenz_curve`
 - Mean Log-Deviation: `mean_logdev`
 - ModVR (Variation around the Mode): `ModVR`
+- Pietra index (based on the Lorenz curve): `pietra_lorenz`
 - Range (simple): `range`
 - RanVR (Range around the Mode): `RanVR`
+- Rao's quadratic entropy: `rqe`
+- Rao's generalized quadratic entropy: `qrqe`
 - Shannon heterogeneity: `shannon`
 - Shannon entropy: `shannon_entropy`
 - Simpson index (aka Herfindahl index): `simpson`
@@ -41,6 +48,8 @@ Documentation is provided in the Jupyter notebooks located in the `docs/` direct
 
 - Bootstrap sampling: `bootci`
     - State of the art approach is implemented: bias-corrected and accelerated [BCa] confidence intervals
+    - Note this currently only works for measures of Type I (richness) heterogeneity
+- Methods for which we have closed form estimators have those implemented by default
 
 ## Measures to Add
 
@@ -61,23 +70,21 @@ Documentation is provided in the Jupyter notebooks located in the `docs/` direct
 - Fisher's $\\alpha$: `fisher_alpha`
 - Functional Attribute Diversity: `fad`
 - Functional Hill Numbers: `func_hill`
-- Functional Range: `func_range`
 - Functional dendrogram: `func_dendrogram`
-- Functional divergence: `func_divergence`
-- Functional dispersion: `func_dispersion`
-- Functional evenness: `func_evenness`
+- Functional dispersion: `func_disp`
+- Functional evenness: `func_eve`
 - Functional logarithmic variance: `func_logvar`
 - Functional unalikeability: `func_unalikeability`
-- Functional richness: `func_richness`
+- Functional Range: `func_range`
+- Functional regularity: `func_reg`
+- Functional richness: `func_ric`
 - Functional variance: `func_var`
 - Functional volume: `func_vol`
-- Gini inequality index: `gini_coef`
 - Help index: `help_index`
 - Huffman code length: `huffman`
 - Leinster-Cobbold index: `leinster_cobbold`
 - Lempel-Ziv code length: `lempel_ziv`
 - Logarithmic variance: `logvar`
-- Lorenz curves: `lorenz_curve`
 - Magurran-Henderson: `magurran_henderson`
 - Margalef's index: `margalef`
 - McIntosh's D: `mcintosh_d`
@@ -88,10 +95,8 @@ Documentation is provided in the Jupyter notebooks located in the `docs/` direct
 - Menhinick's index: `menhinick`
 - Modified functional attribute diversity: `mfad`
 - Pielou J: `pielou`
-- Pietra index: `pietra`
 - Pooled Rarefaction: `pooled_rarefaction`
 - Relative mean deviation: `rel_mean_dev`
-- Rao's (generalized) quadratic entropy: `rqe`
 - Numbers equivalent RQE: `rqe_neq`
 - Rademacher complexity: `rademacher`
 - Ricotta-Szeidl entropy: `ricotta_szeidl`

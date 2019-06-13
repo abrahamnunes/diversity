@@ -30,7 +30,6 @@ def _berger_parker_diversity(x):
     p = _normalize(x)
     return 1/np.max(p)
 
-
 def _gei(y, q=1):
     """ Base function for the Generalized Entropy Index
 
@@ -51,6 +50,19 @@ def _gei(y, q=1):
         out = (_qsum(y/np.mean(y), q)/y.size - 1)/(q*(q-1))
     return out
 
+def _gini_lorenz(L):
+    """ Base function for computation of the Gini inequality coefficient based on the Lorenz curve
+
+    Arguments:
+
+        L: `ndarray(nclasses)`. Lorenz curve
+
+    Returns:
+
+        `float`
+    """
+    out = 2*np.mean(np.linspace(0, 1, L.size)-L)
+
 def _hartley(x):
     """ Base function for Hartley heterogeneity
 
@@ -66,6 +78,23 @@ def _hartley(x):
     p = _normalize(x)
     return p[p.nonzero()].size
 
+def _lorenz_curve(x):
+    """ Base function to construct a Lorenz curve
+
+    Arguments:
+
+        x: `ndarray(nclasses)`. Vector of features
+
+    Returns:
+
+        `ndarray(nclasses)`
+
+    References:
+
+        - Lorenz MO. Methods of Measuring the Concentration of Wealth. Publ Am Stat Assoc 1905; 9: 202–19.
+    """
+    return np.cumsum(np.sort(x)/np.sum(x))
+
 def _mean_logdev(y):
     """ Base function for the Mean log deviation
 
@@ -80,6 +109,19 @@ def _mean_logdev(y):
     n = y.size
     y_ = y/np.mean(y)
     return -(np.sum(np.ma.log(y_)))/n
+
+def _pietra_lorenz(L):
+    """ Base function for computation of the Pietra inequality coefficient based on the Lorenz curve
+
+    Arguments:
+
+        L: `ndarray(nclasses)`. Lorenz curve
+
+    Returns:
+
+        `float`
+    """
+    out = np.max(np.linspace(0, 1, L.size)-L)
 
 def _qsum(x, q=1):
     """ Base function for the exponentiated sum

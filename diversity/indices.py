@@ -33,8 +33,6 @@ def berger_parker_dominance(p, axis=0):
     """
     return 1/berger_parker_diversity(p, axis=axis)
 
-
-
 def coef_variation(y, axis=0):
     """ Coefficient of variation
 
@@ -65,6 +63,51 @@ def freeman_index(p, axis=0):
     """
     return 1-berger_parker_dominance(p, axis=axis)
 
+def func_cwm(X, p):
+    """ Functional Community Weighted Mean
+
+    Arguments:
+
+        X: `ndarray((nclasses, ntraits))`. Trait values for each class
+        p: `ndarray(nclasses)`. Discrete probability distribution over classes
+
+    Returns:
+
+        `ndarray(ntraits)` or `float` if `ntraits==1`
+
+    References:
+
+        - Mason NWH et al. An index of functional diversity. J Veg Sci 2003; 14: 571–8.
+    """
+    if np.ndim(X) == 1:
+        X = X.reshape(p.size, 1)
+    out = np.einsum('i,ij->j', p, X)
+    return out
+
+def func_div(X, p):
+    """ Functional divergence measure
+
+    Arguments:
+
+        X: `ndarray((nclasses, ntraits))`. Trait values for each class
+        p: `ndarray(nclasses)`. Discrete probability distribution over classes
+
+    Returns:
+
+        `ndarray(ntraits)` or `float` if `ntraits==1`
+
+    References:
+
+        - Mason NWH et al. An index of functional diversity. J Veg Sci 2003; 14: 571–8.
+    """
+    if np.ndim(X) == 1:
+        X = X.reshape(p.size, 1)
+    _logX = np.einsum('i,ij->j', p, np.ma.log(X))
+    sq_diff = np.power(np.ma.log(X) - np.tile(_logX, [X.shape[0], 1]), 2)
+    V = np.einsum('i,ij->j', p, sq_diff)
+    out = (2/np.pi)*np.arctan(5*V)
+    return out
+
 def gei(y, q=1, axis=0):
     """ Generalized Entropy Index
 
@@ -76,10 +119,24 @@ def gei(y, q=1, axis=0):
 
     Returns:
 
-        `float`
+        `ndarray`
 
     """
     return np.apply_along_axis(div_base._gei, axis=axis, arr=y, q=q)
+
+def gini_lorenz(L, axis=0):
+    """ Computation of the Gini inequality coefficient based on the Lorenz curve
+
+    Arguments:
+
+        L: `ndarray((nclasses,))`. Lorenz curve
+        axis: `int`. Axis over which to apply the measure
+
+    Returns:
+
+        `ndarray`
+    """
+    return np.apply_along_axis(div_base._gini_lorenz, axis=axis, arr=L)
 
 def gini_simpson(p, axis=0):
     """ Gini-Simpson index
@@ -91,10 +148,9 @@ def gini_simpson(p, axis=0):
 
     Returns:
 
-        `ndarra`
+        `ndarray(n)`
     """
     return 1 - (1/np.apply_along_axis(div_base._renyi, axis=axis, arr=p, q=2))
-
 
 def hartley(p, axis=0):
     """ Hartley heterogeneity
@@ -168,6 +224,31 @@ def lincoln_index(s1, s2, method='chapman', alpha=0.05):
 
     return out
 
+def lorenz_curve(X, axis=0, return_prop=True):
+    """ Constructs a Lorenz curve
+
+    Arguments:
+
+        X: `ndarray((nclasses, nsamples))` if `axis==0` or `ndarray((nsamples, nclasses))` if `axis==1`. Values over which Lorenz curve should be computed
+        axis: `int`. Axis over which to compute Lorenz curves
+        return_prop: `bool`. Whether to also return the cumulative proportion of the population.
+
+    Returns:
+
+        (`ndarray(nclasses)`, `ndarray(X.shape)`) if `return_prop==True`
+        `ndarray(X.shape)` if `return_prop==False`
+
+    References:
+
+        - Lorenz MO. Methods of Measuring the Concentration of Wealth. Publ Am Stat Assoc 1905; 9: 202–19.
+    """
+    L = np.apply_along_axis(div_base._lorenz_curve, axis=axis, arr=X)
+    if return_prop == True:
+        p = np.linspace(0, 1, L.shape[axis])
+        out = (p, L)
+    else:
+        out = L
+    return out
 
 def mean_logdev(y, axis=0):
     """ Mean Log Deviation
@@ -199,6 +280,42 @@ def ModVR(p, axis=0):
     """
     n = p.shape[axis]
     return (n/(n-1))*berger_parker_dominance(p, axis=axis)
+
+def pietra_lorenz(L, axis=0):
+    """ Computation of the Pietra inequality coefficient based on the Lorenz curve
+
+    Arguments:
+
+        L: `ndarray((nclasses,))`. Lorenz curve
+        axis: `int`. Axis over which to apply the measure
+
+    Returns:
+
+        `ndarray`
+    """
+    return np.apply_along_axis(div_base._pietra_lorenz, axis=axis, arr=L)
+
+def qrqe(D, p, q=1):
+    """ Rao's generalized quadratic entropy
+
+    Arguments:
+
+        D: `ndarray((nclasses, nclasses))`. Dissimilarity matrix
+        p: `ndarray(nclasses)`. Probability distribution
+        q: `float>0`. Order of the RQE measure
+
+    Returns:
+
+        `float`
+
+    References:
+
+        - Chiu CH, Chao A. Distance-based functional diversity measures and their decomposition: A framework based on hill numbers. PLoS One 2014; 9.
+        - Rao CR. Diversity and dissimilarity coefficients: A unified approach. Theoretical Population Biology. 1982;21(1):24-43
+
+
+    """
+    return np.sum(D*np.power(np.outer(p, p), q))
 
 def RanVR(p, axis=0):
     """ Variation around the mode
@@ -282,6 +399,53 @@ def renyi_entropy(p, q=1, axis=0):
     """
     return np.log(np.apply_along_axis(div_base._renyi, axis=axis, arr=p, q=q))
 
+def rqe(D, a, method='nei-tajima'):
+    """ Rao's quadratic entropy
+
+    Arguments:
+
+        D: `ndarray((nclasses, nclasses))`. Dissimilarity matrix
+        a: `ndarray(nclasses)`. Vector of abundances. If `method='nei-tajima'`, this must be a vector of counts.
+        method: `{'nei-tajima', 'base'}`. Which RQE is being calculated. The Nei-Tajima estimator is unbiased and returns a variance estimate
+
+    Returns:
+
+        `(estimate [float], variance [float])` if `method='nei-tajima'`
+        `float` if `method='base'`.
+
+    TODO:
+
+        - Currently the variance estimates with the Nei-Tajima estimator behave strangely. I would not yet use these in production. I will do some investigation comparing these to bootstrap estimates.
+        - Add capacity for bootstrap estimation.
+
+    References:
+
+        - Rao (1982). Diversity and dissimilarity coefficients: A unified approach. Theoretical Population Biology. 21(1):24-43
+        - Nei & Tajima (1981). DNA Polymorphism Detectable by Restriction Endonucleases. Genetics. 97: 145-163
+
+
+    """
+    p = div_base._normalize(a)
+
+    # Extract upper triangular elements
+    if method == 'base':
+        out = np.einsum('i,ij,j->', p, D, p)
+    else:
+        p = div_base._normalize(a)
+        Nt = a.sum()
+        Nc = p.size
+        pDp = np.einsum('i,ij,j->', p, D, p)
+        Q_hat = (Nt/(Nt-1))*pDp
+
+        # Variance
+        Term_A = (1.5-Nc)*np.power(pDp, 2)
+        Term_B = (Nc-2)*np.einsum('ij,ik,i,j,k->', D, D, p, p, p)
+        Term_C = 0.5*np.einsum('i,ij,j->', p, D**2, p)
+        Q_var = (4/(Nc*(Nc-1)))*(Term_A + Term_B + Term_C)
+
+        out = (Q_hat, Q_var)
+    return out
+
 def shannon(p, axis=0):
     """ Shannon heterogeneity
 
@@ -314,7 +478,6 @@ def shannon_entropy(p, axis=0):
     """
     return np.log(shannon(p, axis=axis))
 
-
 def simpson(p, axis=0):
     """ Simpson index
 
@@ -328,7 +491,6 @@ def simpson(p, axis=0):
         `ndarra`
     """
     return 1/simpson_dominance(p, axis=axis)
-
 
 def simpson_dominance(p, axis=0):
     """ Simpson dominance index
