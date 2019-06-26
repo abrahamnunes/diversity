@@ -55,4 +55,4 @@ def bootci(x, estimator, K=1000, alpha=0.05, rng=np.random.RandomState(), **kwar
     # Compute and return confidence intervals
     Phi = lambda z0, Z, ahat: norm.cdf(z0+(z0+Z)/(1-ahat*(z0+Z)))
 
-    return (m_bs, np.percentile(Tbs, [Phi(Zo,Za,a_)*100, Phi(Zo,Z_a,a_)*100]))
+    return (Mbs, np.percentile(Tbs, [Phi(Zo,Za,a_)*100, Phi(Zo,Z_a,a_)*100]))
