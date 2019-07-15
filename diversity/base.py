@@ -93,7 +93,7 @@ def _lorenz_curve(x):
 
         - Lorenz MO. Methods of Measuring the Concentration of Wealth. Publ Am Stat Assoc 1905; 9: 202–19.
     """
-    return np.cumsum(np.sort(x)/np.sum(x))
+    return np.hstack(([0],np.cumsum(np.sort(x)/np.sum(x))))
 
 def _mean_logdev(y):
     """ Base function for the Mean log deviation
