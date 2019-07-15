@@ -11,11 +11,11 @@ from diversity.indices import *
 from diversity.decompositions import *
 from diversity import base
 from diversity import datasets
-from diversity import estimators
+from diversity import bootstrap
 
 __all__ = [
     'base',
     'datasets',
     'decompositions',
-    'estimators',
+    'bootstrap',
     'indices']

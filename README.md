@@ -46,7 +46,7 @@ Documentation is provided in the Jupyter notebooks located in the `docs/` direct
 
 ## Methods for Estimation
 
-- Bootstrap sampling: `bootci`
+- Bootstrap sampling: `div.bootstrap.bootci`
     - State of the art approach is implemented: bias-corrected and accelerated [BCa] confidence intervals
     - Note this currently only works for measures of Type I (richness) heterogeneity
 - Methods for which we have closed form estimators have those implemented by default
