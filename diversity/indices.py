@@ -532,6 +532,53 @@ def tsallis_entropy(p, q=1, axis=0):
 
     Returns:
 
-        `ndarra`
+        `float`
     """
     return np.apply_along_axis(div_base._tsallis_entropy, axis=axis, arr=p, q=q)
+
+def func_hill(D, p, q=1):
+    """ Functional Hill numbers
+
+    Arguments:
+
+        D: `ndarray((n,n))`. Distance matrix
+        p: `ndarray(n)`. Probability distribution
+        q: `float`. Order of the functional hill numbers
+
+    Returns:
+
+        `float`
+
+    """
+    pp = np.outer(p, p)
+    if q == 1:
+        out = np.exp(-np.sum((D*pp/qrqe(D,p,1)) * np.ma.log(pp))/2)
+    else:
+        Qq = np.sum(D*(pp**q))
+        Q1 = np.sum(D*pp)
+        out = (Qq/Q1)**(1/(2*(1-q)))
+    return out
+
+
+def leinster_cobbold(D, p, q=1):
+    """ Leinster Cobbold Index
+
+    Arguments:
+
+        S: `ndarray((n,n))`. Similarity matrix
+        p: `ndarray(n)`. Probability distribution
+        q: `float`. Order of the functional hill numbers
+
+    Returns:
+
+        `float`
+
+    """
+    pp = np.outer(p, p)
+    if q == 1:
+        out = Z, p: np.prod((S@p)**(-p))
+    elif q==np.inf:
+        out = np.min(1/(S@p))
+    else:
+        out = (p@((S@p)**(q-1)))**(1/(1-q))
+    return out
