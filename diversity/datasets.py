@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.preprocessing import MinMaxScaler
 
 def skew_pmf(a=1, n=10):
     """ Creates a skewed discrete distribution
