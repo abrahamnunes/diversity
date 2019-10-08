@@ -560,7 +560,7 @@ def func_hill(D, p, q=1):
     return out
 
 
-def leinster_cobbold(D, p, q=1):
+def leinster_cobbold(S, p, q=1):
     """ Leinster Cobbold Index
 
     Arguments:
@@ -576,7 +576,7 @@ def leinster_cobbold(D, p, q=1):
     """
     pp = np.outer(p, p)
     if q == 1:
-        out = Z, p: np.prod((S@p)**(-p))
+        out = np.prod((S@p)**(-p))
     elif q==np.inf:
         out = np.min(1/(S@p))
     else:

@@ -12,6 +12,7 @@ from diversity.decompositions import *
 from diversity import base
 from diversity import bootstrap
 from diversity import datasets
+from diversity import utils
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     'bootstrap',
     'datasets',
     'decompositions',
-    'indices']
+    'indices',
+    'utils']
