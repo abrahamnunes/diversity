@@ -1,83 +1,54 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import scipy.stats as ss
-
-def pool_mvn_covariance(mean, cov):
-    """ Pools the covariance matrices between several samples
-
-    Arguments:
-
-        mean: `ndarray((nsamples, n))`. Means for `nsamples` assemblages
-        cov: `ndarray((nsamples, n, n))`. The covariance matrix for `nsamples` assemblages
+from scipy.special import binom as C
+import sklearn.metrics as skm
 
 
-    Returns:
+class FisherHypergeometricDistribution(object):
+    def __init__(self, X=None, n=None, nsucc=None, ntot=None, odds_ratio=None):
+        if X is not None:
+            cm = skm.confusion_matrix(X[:,0], X[:,1])
+            n = cm.sum(0)[1]; nsucc=cm.sum(1)[1]; ntot=cm.sum();
+            odds_ratio = (X[0,0]*X[1,1])/(X[0,1]*X[1,0])
 
-        `float`
-    """
+        self.n = n
+        self.ntot = ntot
+        self.nsucc = nsucc
+        self.nfail = self.ntot - self.nsucc
+        self.odds_ratio = odds_ratio
+        self.xmin = np.maximum(self.n-self.nfail, 0)
+        self.xmax = np.maximum(self.n, self.nsucc)
 
-    dM = (mean-np.tile(mean.mean(0), [mean.shape[0], 1]))
-    return (np.sum(cov, 0) + dM.T@dM)/mean.shape[0]
 
+        self.domain = np.array([x for x in range(self.xmin, self.xmax + 1)])
+        self.prob = np.array([C(self.nsucc, x)*C(self.nfail, self.n-x)*(self.odds_ratio**x) for x in self.domain])
+        self.Z = np.sum(self.prob)
+        self.prob = self.prob/self.Z
+        self.cumprob = np.cumsum(self.prob)
+        self.tailprob = 1 - self.cumprob
 
-def mvn_renyi(cov, q=1):
-    """ Renyi heterogeneity of a multivariate Gaussian distribution
+    def compute_normalization_constant(self):
+        return np.sum([C(self.nsucc, y)*C(self.nfail, self.n-y)*(self.odds_ratio**y) for y in range(self.xmin, self.xmax+1)])
 
-    Arguments:
+    def pmf(self, x):
+        return self.prob[np.equal(self.domain, x)]
 
-        cov: `ndarray((n, n))`. The covariance matrix
-        q: `float>0`. The order of the measure
+    def sf(self, x):
+        if x + 1 < self.domain[-1]:
+            tailprob = self.tailprob[np.equal(self.domain, x)]
+        elif x < self.xmin:
+            tailprob = 1
+        else:
+            tailprob = 0
+        return tailprob
 
-    Returns:
+    def cdf(self, x):
+        if x < self.xmin:
+            cprob = 0
+        else:
+            cprob = self.cumprob[np.equal(self.domain, x)]
+        return cprob
 
-        `float`
-    """
-    if q == 1:
-        out = np.exp(cov.shape[0]/2)*np.sqrt(np.linalg.det(2*np.pi*cov))
-    else:
-        out = np.sqrt(np.linalg.det(q**(1/(q-1) * 2*np.pi*cov)))
-
-def mvn_renyi_alpha(cov, q=1):
-    """ Renyi heterogeneity of a multivariate Gaussian distribution
-
-    Note: currently this only supports 1/nsamples weights for each of the component distributions
-
-    Arguments:
-
-        cov: `ndarray((nsamples, n, n))`. The covariance matrix for `nsamples` assemblages
-        q: `float>0`. The order of the measure
-
-    Returns:
-
-        `float`
-    """
-    nsamples, n, _ = cov.shape
-    detC = np.linalg.det(cov)
-    if q == 1:
-        Z = (2*np.pi*np.e)**(n/2)
-        out = Z*np.prod(detC**(1/(2*nsamples)))
-    else:
-        Z = np.sqrt((2*np.pi*q**(1/(q-1)))**n)
-        out = Z*(np.sum(detC**((1-q)/2))/nsamples)**(1/(1-q))
-    return out
-
-def mvn_renyi_decomp(mean, cov, w=None, q=1):
-    """ Decomposition of Renyi heterogeneity of a Gaussian Mixture
-
-    Arguments:
-
-        mean: `ndarray((nsamples, n))`. Means for `nsamples` assemblages
-        cov: `ndarray((nsamples, n, n))`. The covariance matrix for `nsamples` assemblages
-        q: `float>0`. The order of the measure
-
-    Returns:
-
-        Tuple with the following
-            gamma: `float`. Pooled Renyi heterogeneity
-            alpha: `float`. Within group heterogeneity
-            beta:  `float`. Between group heterogeneity
-
-    """
-    gamma = mvn_renyi(pool_mvn_covariance(mean, cov), q=q)
-    alpha = mvn_renyi_alpha(mean, cov, q=q)
-    return (gamma, alpha, gamma/alpha)
+    def ppf(self, p):
+        return self.domain[np.less_equal(p - self.cumprob, 0)][0]

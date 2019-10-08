@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 
 def partition_dissimilarity_matrix(D, labels, normalize=False):
     """ Based on sample-wise dissimilarity matrix and partition ID's, finds the average dissimilarity between partitions
@@ -30,3 +31,19 @@ def partition_dissimilarity_matrix(D, labels, normalize=False):
         Dout /= np.max(Dout)
 
     return Dout
+
+def p_labels(y):
+    """ Computes the probability of each class in a set of labels
+
+    Arguments:
+
+        y: `ndarray(n)`. Labels
+
+    Returns:
+
+        `ndarray(nclasses)`
+
+    """
+    y = y.reshape(y.size, -1)
+    p = OneHotEncoder(categories="auto").fit_transform(y).todense()
+    return np.ravel(p.sum(0)/p.sum())

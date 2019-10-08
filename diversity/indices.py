@@ -552,13 +552,14 @@ def func_hill(D, p, q=1):
     """
     pp = np.outer(p, p)
     if q == 1:
-        out = np.exp(-np.sum((D*pp/qrqe(D,p,1)) * np.ma.log(pp))/2)
+        Dpp = D*pp
+        Q1 = np.sum(Dpp)
+        out = np.exp(-np.sum((Dpp/Q1) * np.ma.log(pp))/2)
     else:
         Qq = np.sum(D*(pp**q))
         Q1 = np.sum(D*pp)
         out = (Qq/Q1)**(1/(2*(1-q)))
     return out
-
 
 def leinster_cobbold(S, p, q=1):
     """ Leinster Cobbold Index
@@ -582,3 +583,21 @@ def leinster_cobbold(S, p, q=1):
     else:
         out = (p@((S@p)**(q-1)))**(1/(1-q))
     return out
+
+
+def ricotta_szeidl(D, p):
+    """ Ricotta & Szeidl's Numbers Equivalent RQE
+
+    Arguments:
+
+        D: `ndarray((n,n))`. Distance matrix
+        p: `ndarray(n)`. Probability distribution
+        q: `float`. Order of the functional hill numbers
+
+    Returns:
+
+        `float`
+
+    """
+    rqe = np.sum(D*np.outer(p,p))
+    return 1/(1-rqe/np.max(D))
