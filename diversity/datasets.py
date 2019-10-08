@@ -65,7 +65,7 @@ class ClassificationData(object):
         self.shuffle = shuffle
         self.feature_range = feature_range
         self.rng = rng
-        self.prob = div.datasets.skew_pmf(self.alpha, self.nclusters)
+        self.prob = skew_pmf(self.alpha, self.nclusters)
 
 
     def sample(self):
