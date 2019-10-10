@@ -361,7 +361,7 @@ def renyi(p, q=1, axis=0):
     """
     return np.apply_along_axis(div_base._renyi, axis=axis, arr=p, q=q)
 
-def renyi_alpha(P, w=None, q=1, axis=0):
+def renyi_alpha(P, w=None, q=1, axis=0, ptol=1e-7):
     """ Within-group (Alpha) Renyi heterogeneity
 
     Arguments:
@@ -369,16 +369,17 @@ def renyi_alpha(P, w=None, q=1, axis=0):
         p: `ndarray((nsamples, nclasses))`. Probability distribution
         q: `float>=0`. Order of the Renyi heterogeneity measure
         axis: `int`. Axis along which to apply the measure
+        ptol: `float`. Where to threshold probabilities to 0
 
     Returns:
 
         `float`
     """
     if w is None:
-        w = np.array([1/P.shape[0]]*P.shape[0])
+        w = np.repeat(1/P.shape[0], P.shape[0])
 
     if q == 1:
-        wPLogP = np.sum([w[i]*(p[p.nonzero()]*np.log(p[p.nonzero()])) for i,p in enumerate(P)])
+        wPLogP = np.sum([w[i]*np.sum(p[np.greater(p, ptol)]*np.log(p[np.greater(p, ptol)])) for i,p in enumerate(P)])
         out = np.exp(-wPLogP)
     else:
         powersum = np.sum((w**q)*np.array([np.sum(p[p.nonzero()]**q) for _, p in enumerate(P)]))
