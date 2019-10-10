@@ -377,10 +377,15 @@ def renyi_alpha(P, w=None, q=1, axis=0):
     if w is None:
         w = np.array([1/P.shape[0]]*P.shape[0])
 
+    # Change P to list with zeroed entries removed
+    P = [ for p in P]
+
     if q == 1:
-        out = np.exp(np.sum(-w*np.sum(P*np.ma.log(P), 1)))
+        wPLogP = np.sum([w[i]*(p[p.nonzero()]*np.log(p[p.nonzero()])) for i,p in enumerate(P)])
+        out = np.exp(-wPLogP)
     else:
-        out = (np.sum((w**q)*np.sum(P**q, 1))/np.sum(w**q))**(1/(1-q))
+        powersum = np.sum((w**q)*np.array([np.sum(p[p.nonzero()]**q) for _, p in enumerate(P)]))
+        out = (powersum/np.sum(w**q))**(1/(1-q))
 
     return out
 
